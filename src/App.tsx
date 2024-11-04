@@ -34,7 +34,7 @@ function App() {
   ) : (
     <DefaultLayout>
       <Routes>
-        <Route
+        {/* <Route
           index
           element={
             <>
@@ -69,7 +69,7 @@ function App() {
               <FormElements />
             </>
           }
-        />
+        /> */}
         <Route
           path="/forms/form-layout"
           element={
@@ -88,7 +88,7 @@ function App() {
             </>
           }
         />
-        <Route
+        {/* <Route
           path="/settings"
           element={
             <>
@@ -96,7 +96,7 @@ function App() {
               <Settings />
             </>
           }
-        />
+        /> */}
         <Route
           path="/chart"
           element={
@@ -106,7 +106,7 @@ function App() {
             </>
           }
         />
-        <Route
+        {/* <Route
           path="/ui/alerts"
           element={
             <>
@@ -140,8 +140,8 @@ function App() {
               <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <SignUp />
             </>
-          }
-        />
+          } 
+        />*/}
       </Routes>
     </DefaultLayout>
   );
