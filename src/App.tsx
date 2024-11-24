@@ -69,7 +69,7 @@ function App() {
               <FormElements />
             </>
           }
-        /> */}
+        /> 
         <Route
           path="/forms/form-layout"
           element={
@@ -78,9 +78,9 @@ function App() {
               <FormLayout />
             </>
           }
-        />
+        />*/}
         <Route
-          path="/tables"
+          index
           element={
             <>
               <PageTitle title="Tables | TailAdmin - Tailwind CSS Admin Dashboard Template" />

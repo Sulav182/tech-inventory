@@ -1,127 +1,343 @@
-import { BRAND } from '../../types/brand';
-import BrandOne from '../../images/brand/brand-01.svg';
-import BrandTwo from '../../images/brand/brand-02.svg';
-import BrandThree from '../../images/brand/brand-03.svg';
-import BrandFour from '../../images/brand/brand-04.svg';
-import BrandFive from '../../images/brand/brand-05.svg';
+import { useMemo, useState } from 'react';
+import {
+  MaterialReactTable,
+  // createRow,
+  type MRT_ColumnDef,
+  type MRT_Row,
+  type MRT_TableOptions,
+  useMaterialReactTable,
+} from 'material-react-table';
+import { Box, Button, IconButton, Tooltip } from '@mui/material';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { type User, usStates } from './makeData';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const brandData: BRAND[] = [
-  {
-    logo: BrandOne,
-    name: 'Google',
-    visitors: 3.5,
-    revenues: '5,768',
-    sales: 590,
-    conversion: 4.8,
-  },
-  {
-    logo: BrandTwo,
-    name: 'Twitter',
-    visitors: 2.2,
-    revenues: '4,635',
-    sales: 467,
-    conversion: 4.3,
-  },
-  {
-    logo: BrandThree,
-    name: 'Github',
-    visitors: 2.1,
-    revenues: '4,290',
-    sales: 420,
-    conversion: 3.7,
-  },
-  {
-    logo: BrandFour,
-    name: 'Vimeo',
-    visitors: 1.5,
-    revenues: '3,580',
-    sales: 389,
-    conversion: 2.5,
-  },
-  {
-    logo: BrandFive,
-    name: 'Facebook',
-    visitors: 3.5,
-    revenues: '6,768',
-    sales: 390,
-    conversion: 4.2,
-  },
-];
+const Example = () => {
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string | undefined>
+  >({});
 
-const TableOne = () => {
-  return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        Top Channels
-      </h4>
-
-      <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
-          <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Source
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Visitors
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Revenues
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Sales
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Conversion
-            </h5>
-          </div>
-        </div>
-
-        {brandData.map((brand, key) => (
-          <div
-            className={`grid grid-cols-3 sm:grid-cols-5 ${
-              key === brandData.length - 1
-                ? ''
-                : 'border-b border-stroke dark:border-strokedark'
-            }`}
-            key={key}
-          >
-            <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <div className="flex-shrink-0">
-                <img src={brand.logo} alt="Brand" />
-              </div>
-              <p className="hidden text-black dark:text-white sm:block">
-                {brand.name}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.visitors}K</p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-meta-3">${brand.revenues}</p>
-            </div>
-
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-black dark:text-white">{brand.sales}</p>
-            </div>
-
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-meta-5">{brand.conversion}%</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+  const columns = useMemo<MRT_ColumnDef<User>[]>(
+    () => [
+      {
+        accessorKey: 'userId',
+        header: 'User Id',
+        enableEditing: false,
+        size: 80,
+      },
+      {
+        accessorKey: 'id',
+        header: 'ID',
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.id,
+          helperText: validationErrors?.id,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              firstName: undefined,
+            }),
+          //optionally add validation checking for onBlur or onChange
+        },
+      },
+      {
+        accessorKey: 'title',
+        header: 'Title',
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.title,
+          helperText: validationErrors?.title,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              lastName: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: 'completed',
+        header: 'Completed',
+        muiEditTextFieldProps: {
+          //type: 'email',
+          required: true,
+          error: !!validationErrors?.completed,
+          helperText: validationErrors?.completed,
+          //remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              email: undefined,
+            }),
+        },
+      },
+      // {
+      //   accessorKey: 'state',
+      //   header: 'State',
+      //   editVariant: 'select',
+      //   editSelectOptions: usStates,
+      //   muiEditTextFieldProps: {
+      //     select: true,
+      //     error: !!validationErrors?.state,
+      //     helperText: validationErrors?.state,
+      //   },
+      // },
+    ],
+    [validationErrors],
   );
+
+  //call CREATE hook
+  const { mutateAsync: createUser, isPending: isCreatingUser } =
+    useCreateUser();
+  //call READ hook
+  const {
+    data: fetchedUsers = [],
+    isError: isLoadingUsersError,
+    isFetching: isFetchingUsers,
+    isLoading: isLoadingUsers,
+  } = useGetUsers();
+  //console.log(data)
+  //call UPDATE hook
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
+    useUpdateUser();
+  //call DELETE hook
+  const { mutateAsync: deleteUser, isPending: isDeletingUser } =
+    useDeleteUser();
+
+  //CREATE action
+  const handleCreateUser: MRT_TableOptions<User>['onCreatingRowSave'] = async ({
+    values,
+    table,
+  }) => {
+    const newValidationErrors = validateUser(values);
+    if (Object.values(newValidationErrors).some((error) => error)) {
+      setValidationErrors(newValidationErrors);
+      return;
+    }
+    setValidationErrors({});
+    await createUser(values);
+    table.setCreatingRow(null); //exit creating mode
+  };
+
+  //UPDATE action
+  const handleSaveUser: MRT_TableOptions<User>['onEditingRowSave'] = async ({
+    values,
+    table,
+  }) => {
+    const newValidationErrors = validateUser(values);
+    if (Object.values(newValidationErrors).some((error) => error)) {
+      setValidationErrors(newValidationErrors);
+      return;
+    }
+    setValidationErrors({});
+    await updateUser(values);
+    table.setEditingRow(null); //exit editing mode
+  };
+
+  //DELETE action
+  const openDeleteConfirmModal = (row: MRT_Row<User>) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      deleteUser(row.original.id);
+    }
+  };
+
+  const table = useMaterialReactTable({
+    columns,
+    data: fetchedUsers,
+    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
+    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
+    enableEditing: true,
+    getRowId: (row) => row.id,
+    muiToolbarAlertBannerProps: isLoadingUsersError
+      ? {
+          color: 'error',
+          children: 'Error loading data',
+        }
+      : undefined,
+    muiTableContainerProps: {
+      sx: {
+        minHeight: '500px',
+      },
+    },
+    onCreatingRowCancel: () => setValidationErrors({}),
+    onCreatingRowSave: handleCreateUser,
+    onEditingRowCancel: () => setValidationErrors({}),
+    onEditingRowSave: handleSaveUser,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+    renderTopToolbarCustomActions: ({ table }) => (
+      <Button
+        variant="contained"
+        onClick={() => {
+          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
+          //or you can pass in a row object to set default values with the `createRow` helper function
+          // table.setCreatingRow(
+          //   createRow(table, {
+          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
+          //   }),
+          // );
+        }}
+      >
+        Create New User
+      </Button>
+    ),
+    state: {
+      isLoading: isLoadingUsers,
+      isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
+      showAlertBanner: isLoadingUsersError,
+      showProgressBars: isFetchingUsers,
+    },
+  });
+
+  return <MaterialReactTable table={table} />;
 };
 
-export default TableOne;
+//CREATE hook (post new user to api)
+function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (user: User) => {
+      //send api update request here
+      const res = await Promise.resolve(fetch("https://jsonplaceholder.typicode.com/todos",{
+        method: "post",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+
+        // //make sure to serialize your JSON body
+        body: JSON.stringify(user)
+      }))
+      return res.json();
+    },
+    //client side optimistic update
+    onMutate: (newUserInfo: User) => {
+      queryClient.setQueryData(
+        ['users'],
+        (prevUsers: any) =>
+          [
+            ...prevUsers,
+            {
+              ...newUserInfo,
+              //id: (Math.random() + 1).toString(36).substring(7),
+            },
+          ] as User[],
+      );
+    },
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+  });
+}
+
+//READ hook (get users from api)
+function useGetUsers() {
+  return useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      //send api request here
+      // await new Promise((resolve) => fetch("https://jsonplaceholder.typicode.com/users")); //fake api call
+      // return Promise.resolve(fakeData);
+      const res = await Promise.resolve(fetch("https://jsonplaceholder.typicode.com/todos"))
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+}
+
+//UPDATE hook (put user in api)
+function useUpdateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (user: User) => {
+      //send api update request here
+      const res = await Promise.resolve(fetch("https://jsonplaceholder.typicode.com/todos",{
+        method: "put",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+
+        // //make sure to serialize your JSON body
+        body: JSON.stringify(user)
+      }))
+      return res.json();
+    },
+    //client side optimistic update
+    onMutate: (newUserInfo: User) => {
+      queryClient.setQueryData(['users'], (prevUsers: any) =>
+        prevUsers?.map((prevUser: User) =>
+          prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
+        ),
+      );
+    },
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+  });
+}
+
+//DELETE hook (delete user in api)
+function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      //send api update request here
+      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+      return Promise.resolve();
+    },
+    //client side optimistic update
+    onMutate: (userId: string) => {
+      queryClient.setQueryData(['users'], (prevUsers: any) =>
+        prevUsers?.filter((user: User) => user.id !== userId),
+      );
+    },
+    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+  });
+}
+
+const queryClient = new QueryClient();
+
+const ExampleWithProviders = () => (
+  //Put this with your other react-query providers near root of your app
+  <QueryClientProvider client={queryClient}>
+    <Example />
+  </QueryClientProvider>
+);
+
+export default ExampleWithProviders;
+
+const validateRequired = (value: string) => !!value.length;
+const validateEmail = (email: string) =>
+  !!email.length &&
+  email
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    );
+
+function validateUser(user: User) {
+  return {
+    title: !validateRequired(user.title)
+      ? 'Title is Required'
+      : '',
+    completed: !validateRequired(user.completed) ? 'Complete status is Required' : '',
+    //userId: !validateRequired(user.userId) ? 'usedId' : '',
+  };
+}
