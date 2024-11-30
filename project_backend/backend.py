@@ -20,17 +20,6 @@ def get_db_connection():
         port=DB_CONFIG['port']
     )
 
-
-def get_db_connection():
-    """Establish and return a MySQL database connection."""
-    return mysql.connector.connect(
-        database=DB_CONFIG['database'],
-        user=DB_CONFIG['user'],
-        password=DB_CONFIG['password'],
-        host=DB_CONFIG['host'],
-        port=DB_CONFIG['port']
-    )
-
 @app.route('/items', methods=['POST', 'PUT', 'DELETE'])
 def items_table_handler():
     conn = get_db_connection()
@@ -76,13 +65,14 @@ def items_table_handler():
         cursor.close()
         conn.close()
 
-@app.route('/table_date/<table_name>', methods=['GET'])
+@app.route('/table_data/<table_name>', methods=['GET'])
 def dynamic_table_handler(table_name):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)  # Dictionary cursor for JSON compatibility
 
     try:
         if request.method == 'GET':
+            table_name = table_name.capitalize()
             # Fetch all records from the specified table
             cursor.execute(f"SELECT * FROM {table_name}")
             records = cursor.fetchall()
@@ -104,9 +94,9 @@ def dynamic_graph_data_handler(query_type):
                 c.customer_id, 
                 c.customer_name, 
                 SUM(i.total) AS total_spent
-            FROM customer c
-            JOIN orders o ON c.customer_id = o.customer_id
-            JOIN invoice i ON o.order_id = i.order_id
+            FROM Customer c
+            JOIN Orders o ON c.customer_id = o.customer_id
+            JOIN Invoice i ON o.order_id = i.order_id
             GROUP BY c.customer_id, c.customer_name
             ORDER BY total_spent DESC
             LIMIT 5;
@@ -115,7 +105,7 @@ def dynamic_graph_data_handler(query_type):
             SELECT 
                 DATE_FORMAT(o.date, '%Y-%m') AS order_month, 
                 COUNT(o.order_id) AS total_orders
-            FROM orders o
+            FROM Orders o
             GROUP BY order_month
             ORDER BY order_month ASC;
         """,
@@ -124,8 +114,8 @@ def dynamic_graph_data_handler(query_type):
                 i.item_id, 
                 i.name AS item_name, 
                 SUM(o.quantity) AS total_quantity_sold
-            FROM items i
-            JOIN orders o ON i.item_id = o.item_id
+            FROM Items i
+            JOIN Orders o ON i.item_id = o.item_id
             GROUP BY i.item_id, i.name
             ORDER BY total_quantity_sold DESC
             LIMIT 10;
@@ -134,8 +124,8 @@ def dynamic_graph_data_handler(query_type):
             SELECT 
                 pm.type AS payment_method, 
                 COUNT(o.payment_method_id) AS usage_count
-            FROM paymentMethod pm
-            JOIN orders o ON pm.payment_method_id = o.payment_method_id
+            FROM PaymentMethod pm
+            JOIN Orders o ON pm.payment_method_id = o.payment_method_id
             GROUP BY pm.type
             ORDER BY usage_count DESC;
         """,
@@ -143,10 +133,10 @@ def dynamic_graph_data_handler(query_type):
             SELECT 
                 c.category_name, 
                 SUM(i.total) AS total_revenue
-            FROM category c
-            JOIN items it ON c.category_id = it.category_id
-            JOIN orders o ON it.item_id = o.item_id
-            JOIN invoice i ON o.order_id = i.order_id
+            FROM Category c
+            JOIN Items it ON c.category_id = it.category_id
+            JOIN Orders o ON it.item_id = o.item_id
+            JOIN Invoice i ON o.order_id = i.order_id
             GROUP BY c.category_name
             ORDER BY total_revenue DESC;
         """
