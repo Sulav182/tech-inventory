@@ -1,5 +1,5 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
 const options: ApexOptions = {
@@ -8,7 +8,7 @@ const options: ApexOptions = {
     fontFamily: 'Satoshi, sans-serif',
     type: 'bar',
     height: 335,
-    stacked: true,
+    stacked: false,
     toolbar: {
       show: false,
     },
@@ -42,10 +42,6 @@ const options: ApexOptions = {
   dataLabels: {
     enabled: false,
   },
-
-  xaxis: {
-    categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-  },
   legend: {
     position: 'top',
     horizontalAlign: 'left',
@@ -68,28 +64,53 @@ interface ChartTwoState {
     data: number[];
   }[];
 }
-
+interface Xaxis {
+    categories: string[];
+}
 const ChartTwo: React.FC = () => {
   const [state, setState] = useState<ChartTwoState>({
     series: [
       {
-        name: 'Sales',
-        data: [44, 55, 41, 67, 22, 43, 65],
-      },
-      {
-        name: 'Revenue',
-        data: [13, 23, 20, 8, 13, 27, 15],
+        name: 'Total Spent',
+        data: [5, 10],
       },
     ],
   });
-  
+  const [label, setLabel] = useState<Xaxis>({
+    categories: []
+  })
   const handleReset = () => {
     setState((prevState) => ({
       ...prevState,
     }));
   };
-  handleReset;  
-
+  handleReset;
+  useEffect(()=>{
+    var getData = async () => {
+      var res = await Promise.resolve(fetch('http://127.0.0.1:5000/graph_data/top_customers'))
+      return res.json()
+    }
+    const xaxis: string[] = [];
+    const spend: number[] = [];
+    var data = getData()
+    for(let i=0;i<data.length;i++){
+      xaxis.push(data[i].name)
+      spend.push(Number(data[i].total_spent))
+    }
+    setState({
+      series: [
+        {
+          name: 'Total Spent',
+          data: spend,
+        },
+      ],
+    })
+    setLabel({
+      categories: xaxis
+    })
+    console.log(data)    
+    ;
+  },[]);
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
       <div className="mb-4 justify-between gap-4 sm:flex">
@@ -136,6 +157,7 @@ const ChartTwo: React.FC = () => {
         <div id="chartTwo" className="-ml-5 -mb-9">
           <ReactApexChart
             options={options}
+            xaxis={label.categories}
             series={state.series}
             type="bar"
             height={350}
@@ -147,3 +169,4 @@ const ChartTwo: React.FC = () => {
 };
 
 export default ChartTwo;
+

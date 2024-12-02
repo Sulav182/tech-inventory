@@ -1,5 +1,6 @@
 import json
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 import mysql.connector
 
 app = Flask(__name__)
@@ -21,39 +22,51 @@ def get_db_connection():
     )
 
 @app.route('/items', methods=['POST', 'PUT', 'DELETE'])
+@cross_origin()
 def items_table_handler():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)  # Dictionary cursor for JSON compatibility
-
+    print(request.method)
     try:
         if request.method == 'POST':
             # Insert a new record (fields and values sent via JSON body)
             payload = request.json
             fields = ', '.join(payload.keys())
             placeholders = ', '.join(["%s"] * len(payload))
-            query = f"INSERT INTO items ({fields}) VALUES ({placeholders})"
+            query = f"INSERT INTO Items ({fields}) VALUES ({placeholders})"
+            print(query, tuple(payload.values()))
             cursor.execute(query, tuple(payload.values()))
             conn.commit()
-            return jsonify({"message": "Record inserted successfully"}), 201
+            response = jsonify({"message": "Record inserted successfully"})
+            #response.headers.add("Access-Control-Allow-Origin", "*")
+            #response.headers.add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+            return response, 201
 
         elif request.method == 'PUT':
             # Update a record based on primary key/id (id and update fields sent via JSON body)
             payload = request.json
-            record_id = payload.pop('id', None)
+            record_id = payload.pop('item_id', None)
+            print('put', record_id, payload)
             if not record_id:
-                return jsonify({"error": "ID is required for update"}), 400
+                response = jsonify({"error": "ID is required for update"})
+                response.headers.add("Access-Control-Allow-Origin", "*")
+                return response, 400
             updates = ', '.join([f"{key} = %s" for key in payload.keys()])
-            query = f"UPDATE items SET {updates} WHERE id = %s"
+            query = f"UPDATE Items SET {updates} WHERE item_id = %s"
+            print(query)
             cursor.execute(query, (*payload.values(), record_id))
             conn.commit()
-            return jsonify({"message": "Record updated successfully"}), 200
+            response = jsonify({"message": "Record updated successfully"})
+            #response.headers.add("Access-Control-Allow-Origin", "*")
+            return response, 200
 
         elif request.method == 'DELETE':
             # Delete a record by primary key/id (id sent via query parameter)
-            record_id = request.args.get('id')
+            print(request.json, request.args.get('item_id'), request.args)
+            record_id = request.json
             if not record_id:
                 return jsonify({"error": "ID is required for delete"}), 400
-            query = "DELETE FROM items WHERE id = %s"
+            query = "DELETE FROM Items WHERE item_id = %s"
             cursor.execute(query, (record_id,))
             conn.commit()
             return jsonify({"message": "Record deleted successfully"}), 200
@@ -76,7 +89,9 @@ def dynamic_table_handler(table_name):
             # Fetch all records from the specified table
             cursor.execute(f"SELECT * FROM {table_name}")
             records = cursor.fetchall()
-            return jsonify(records), 200
+            response = jsonify(records)
+            response.headers.add("Access-Control-Allow-Origin", "*")
+            return response, 200
 
     except mysql.connector.Error as e:
         return jsonify({"error": str(e)}), 500
@@ -92,12 +107,12 @@ def dynamic_graph_data_handler(query_type):
         "top_customers": """
             SELECT 
                 c.customer_id, 
-                c.customer_name, 
+                c.name, 
                 SUM(i.total) AS total_spent
             FROM Customer c
             JOIN Orders o ON c.customer_id = o.customer_id
             JOIN Invoice i ON o.order_id = i.order_id
-            GROUP BY c.customer_id, c.customer_name
+            GROUP BY c.customer_id, c.name
             ORDER BY total_spent DESC
             LIMIT 5;
         """,
@@ -148,14 +163,18 @@ def dynamic_graph_data_handler(query_type):
     query = queries[query_type]
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-
+    print(query)
     try:
         cursor.execute(query)
         results = cursor.fetchall()
-        return jsonify(results), 200
+        response = jsonify(results)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response, 200
 
     except mysql.connector.Error as e:
-        return jsonify({"error": str(e)}), 500
+        response = jsonify({"error": str(e)})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response, 500
 
     finally:
         cursor.close()

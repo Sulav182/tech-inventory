@@ -2,7 +2,7 @@
     "database": {
         "database": "inventory_csce_350",
         "user": "root",
-        "password": "",
+        "password": "password",
         "host": "localhost",
         "port": 3306
     }

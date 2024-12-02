@@ -15,81 +15,93 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { type User, usStates } from './makeData';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const Example = () => {
+export type Item = {
+  category_id: string,
+  item_id: string,
+  name: string,
+  price: string,
+  quantity:string,
+  type: string
+};
+
+const ItemTable = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
-  const columns = useMemo<MRT_ColumnDef<User>[]>(
+  const columns = useMemo<MRT_ColumnDef<Item>[]>(
     () => [
       {
-        accessorKey: 'userId',
-        header: 'User Id',
-        enableEditing: false,
-        size: 80,
+        accessorKey: 'item_id',
+        header: 'Item Id',
+        // enableEditing: false,
+        // size: 80,
       },
       {
-        accessorKey: 'id',
-        header: 'ID',
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.id,
-          helperText: validationErrors?.id,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              firstName: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
+        accessorKey: 'category_id',
+        header: 'Category ID',
+        // muiEditTextFieldProps: {
+        //   required: true,
+        //   error: !!validationErrors?.id,
+        //   helperText: validationErrors?.id,
+        //   //remove any previous validation errors when user focuses on the input
+        //   onFocus: () =>
+        //     setValidationErrors({
+        //       ...validationErrors,
+        //       firstName: undefined,
+        //     }),
+        //   //optionally add validation checking for onBlur or onChange
+        // },
       },
       {
-        accessorKey: 'title',
-        header: 'Title',
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.title,
-          helperText: validationErrors?.title,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              lastName: undefined,
-            }),
-        },
+        accessorKey: 'name',
+        header: 'Name',
+        // muiEditTextFieldProps: {
+        //   required: true,
+        //   error: !!validationErrors?.title,
+        //   helperText: validationErrors?.title,
+        //   //remove any previous validation errors when user focuses on the input
+        //   onFocus: () =>
+        //     setValidationErrors({
+        //       ...validationErrors,
+        //       lastName: undefined,
+        //     }),
+        // },
       },
       {
-        accessorKey: 'completed',
-        header: 'Completed',
-        muiEditTextFieldProps: {
-          //type: 'email',
-          required: true,
-          error: !!validationErrors?.completed,
-          helperText: validationErrors?.completed,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              email: undefined,
-            }),
-        },
+        accessorKey: 'price',
+        header: 'Price',
+        // muiEditTextFieldProps: {
+        //   //type: 'email',
+        //   required: true,
+        //   error: !!validationErrors?.completed,
+        //   helperText: validationErrors?.completed,
+        //   //remove any previous validation errors when user focuses on the input
+        //   onFocus: () =>
+        //     setValidationErrors({
+        //       ...validationErrors,
+        //       email: undefined,
+        //     }),
+        // },
       },
-      // {
-      //   accessorKey: 'state',
-      //   header: 'State',
-      //   editVariant: 'select',
-      //   editSelectOptions: usStates,
-      //   muiEditTextFieldProps: {
-      //     select: true,
-      //     error: !!validationErrors?.state,
-      //     helperText: validationErrors?.state,
-      //   },
-      // },
+      {
+        accessorKey: 'quantity',
+        header: 'Quantity',
+        // editVariant: 'select',
+        // editSelectOptions: usStates,
+        // muiEditTextFieldProps: {
+        //   select: true,
+        //   error: !!validationErrors?.state,
+        //   helperText: validationErrors?.state,
+        // },
+      },
+      {
+        accessorKey: 'type',
+        header: 'Type',
+      },
     ],
     [validationErrors],
   );
@@ -113,11 +125,11 @@ const Example = () => {
     useDeleteUser();
 
   //CREATE action
-  const handleCreateUser: MRT_TableOptions<User>['onCreatingRowSave'] = async ({
+  const handleCreateUser: MRT_TableOptions<Item>['onCreatingRowSave'] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateUser(values);
+    const newValidationErrors = validateItem(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
@@ -128,11 +140,11 @@ const Example = () => {
   };
 
   //UPDATE action
-  const handleSaveUser: MRT_TableOptions<User>['onEditingRowSave'] = async ({
+  const handleSaveUser: MRT_TableOptions<Item>['onEditingRowSave'] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateUser(values);
+    const newValidationErrors = validateItem(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
@@ -143,9 +155,9 @@ const Example = () => {
   };
 
   //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<User>) => {
+  const openDeleteConfirmModal = (row: MRT_Row<Item>) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      deleteUser(row.original.id);
+      deleteUser(row.original.item_id);
     }
   };
 
@@ -155,7 +167,7 @@ const Example = () => {
     createDisplayMode: 'row', // ('modal', and 'custom' are also available)
     editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
-    getRowId: (row) => row.id,
+    getRowId: (row) => row.item_id,
     muiToolbarAlertBannerProps: isLoadingUsersError
       ? {
           color: 'error',
@@ -198,7 +210,7 @@ const Example = () => {
           // );
         }}
       >
-        Create New User
+        Create New Item
       </Button>
     ),
     state: {
@@ -216,9 +228,9 @@ const Example = () => {
 function useCreateUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (user: User) => {
+    mutationFn: async (item: Item) => {
       //send api update request here
-      const res = await Promise.resolve(fetch("https://jsonplaceholder.typicode.com/todos",{
+      const res = await Promise.resolve(fetch("http://127.0.0.1:5000/items",{
         method: "post",
         headers: {
           'Accept': 'application/json',
@@ -226,37 +238,37 @@ function useCreateUser() {
         },
 
         // //make sure to serialize your JSON body
-        body: JSON.stringify(user)
+        body: JSON.stringify(item)
       }))
       return res.json();
     },
     //client side optimistic update
-    onMutate: (newUserInfo: User) => {
+    onMutate: (newItemInfo: Item) => {
       queryClient.setQueryData(
-        ['users'],
-        (prevUsers: any) =>
+        ['items'],
+        (prevItems: any) =>
           [
-            ...prevUsers,
+            ...prevItems,
             {
-              ...newUserInfo,
+              ...newItemInfo,
               //id: (Math.random() + 1).toString(36).substring(7),
             },
-          ] as User[],
+          ] as Item[],
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['items'] }), //refetch users after mutation, disabled for demo
   });
 }
 
 //READ hook (get users from api)
 function useGetUsers() {
-  return useQuery<User[]>({
-    queryKey: ['users'],
+  return useQuery<Item[]>({
+    queryKey: ['items'],
     queryFn: async () => {
       //send api request here
       // await new Promise((resolve) => fetch("https://jsonplaceholder.typicode.com/users")); //fake api call
       // return Promise.resolve(fakeData);
-      const res = await Promise.resolve(fetch("https://jsonplaceholder.typicode.com/todos"))
+      const res = await Promise.resolve(fetch("http://127.0.0.1:5000/table_data/items"))
       return res.json();
     },
     refetchOnWindowFocus: false,
@@ -267,9 +279,9 @@ function useGetUsers() {
 function useUpdateUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (user: User) => {
+    mutationFn: async (item: Item) => {
       //send api update request here
-      const res = await Promise.resolve(fetch("https://jsonplaceholder.typicode.com/todos",{
+      const res = await Promise.resolve(fetch("http://127.0.0.1:5000/items",{
         method: "put",
         headers: {
           'Accept': 'application/json',
@@ -277,19 +289,19 @@ function useUpdateUser() {
         },
 
         // //make sure to serialize your JSON body
-        body: JSON.stringify(user)
+        body: JSON.stringify(item)
       }))
       return res.json();
     },
     //client side optimistic update
-    onMutate: (newUserInfo: User) => {
-      queryClient.setQueryData(['users'], (prevUsers: any) =>
-        prevUsers?.map((prevUser: User) =>
-          prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
+    onMutate: (newItemInfo: Item) => {
+      queryClient.setQueryData(['items'], (prevItems: any) =>
+        prevItems?.map((prevItem: Item) =>
+          prevItem.item_id === newItemInfo.item_id ? newItemInfo : prevItem,
         ),
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['items'] }), //refetch users after mutation, disabled for demo
   });
 }
 
@@ -297,31 +309,40 @@ function useUpdateUser() {
 function useDeleteUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async (itemId: string) => {
       //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
+      const res = await Promise.resolve(fetch("http://127.0.0.1:5000/items",{
+        method: "delete",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+
+        // //make sure to serialize your JSON body
+        body: JSON.stringify(itemId)
+      }))
+      return res.json();
     },
     //client side optimistic update
-    onMutate: (userId: string) => {
-      queryClient.setQueryData(['users'], (prevUsers: any) =>
-        prevUsers?.filter((user: User) => user.id !== userId),
+    onMutate: (itemId: string) => {
+      queryClient.setQueryData(['items'], (prevUsers: any) =>
+        prevUsers?.filter((item: Item) => item.item_id !== itemId),
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['items'] }), //refetch users after mutation, disabled for demo
   });
 }
 
 const queryClient = new QueryClient();
 
-const ExampleWithProviders = () => (
+const ItemWithProviders = () => (
   //Put this with your other react-query providers near root of your app
   <QueryClientProvider client={queryClient}>
-    <Example />
+    <ItemTable />
   </QueryClientProvider>
 );
 
-export default ExampleWithProviders;
+export default ItemWithProviders;
 
 const validateRequired = (value: string) => !!value.length;
 const validateEmail = (email: string) =>
@@ -332,12 +353,12 @@ const validateEmail = (email: string) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 
-function validateUser(user: User) {
+function validateItem(item: Item) {
   return {
-    title: !validateRequired(user.title)
-      ? 'Title is Required'
+    name: !validateRequired(item.name)
+      ? 'Name is Required'
       : '',
-    completed: !validateRequired(user.completed) ? 'Complete status is Required' : '',
+    price: !validateRequired(item.price) ? 'Price is required' : '',
     //userId: !validateRequired(user.userId) ? 'usedId' : '',
   };
 }

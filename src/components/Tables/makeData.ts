@@ -1,8 +1,8 @@
 export type User = {
-  userId: string,
+  category_id: string,
   id: string,
-  title: string,
-  completed: string
+  name: string,
+  price: string
   };
   
   // export const fakeData: User[] = [
