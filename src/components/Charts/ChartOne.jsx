@@ -56,7 +56,7 @@ export const ChartOne = () => {
       setData({
         labels: xaxis,
         datasets: [{
-          label: 'Expenses by Month',
+          label: 'Top Customers',
           data: spend,
           backgroundColor: [
             'rgb(153, 102, 255)'

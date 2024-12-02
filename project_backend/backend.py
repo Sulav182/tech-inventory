@@ -152,7 +152,7 @@ def dynamic_graph_data_handler(query_type):
             JOIN Items it ON c.category_id = it.category_id
             JOIN Orders o ON it.item_id = o.item_id
             JOIN Invoice i ON o.order_id = i.order_id
-            GROUP BY c.category_name
+            GROUP BY c.name
             ORDER BY total_revenue DESC;
         """
     }
