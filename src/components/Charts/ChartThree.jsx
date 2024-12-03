@@ -67,7 +67,7 @@ export const ChartThree = () => {
     setChart({
       labels: label,
       datasets: [{
-        label: 'My First Dataset',
+        label: 'Payment methods',
         data: count,
         backgroundColor: [
           'rgb(255, 99, 132)',

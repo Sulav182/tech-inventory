@@ -156,7 +156,7 @@ const ItemTable = () => {
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Item>) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('Are you sure you want to delete this item?')) {
       deleteUser(row.original.item_id);
     }
   };
