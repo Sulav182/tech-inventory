@@ -4,13 +4,13 @@ This inventory management system is designed to help efficiently track and manag
 Implementation:
 To implement the project, we first used the db script to create the database and tables. Then we added some dummy data into the table. To start the backend server, we ran the following commands:
 
-$ cd project_backend \n
-$ python3 -m venv final\n
-$ source final/bin/activate\n
-$ pip install flask\n
-$ pip install mysql-connector-python\n
-$ python3 backend.py\n
-\n
-To start the frontend server, we ran the following commands:\n
-$ npm i\n
-$ npm run dev\n
+$ cd project_backend 
+$ python3 -m venv final
+$ source final/bin/activate
+$ pip install flask
+$ pip install mysql-connector-python
+$ python3 backend.py
+
+To start the frontend server, we ran the following commands:
+$ npm i
+$ npm run dev
